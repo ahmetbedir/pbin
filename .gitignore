@@ -5,3 +5,4 @@
 /.vagrant
 .DS_Store
 .phpunit.result.cache
+assets/demo.tape

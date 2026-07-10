@@ -16,23 +16,23 @@ the repository can safely be public.
 **Homebrew (macOS / Linux) — recommended:**
 
 ```bash
-brew install <owner>/pbin/pbin
+brew install ahmetbedir/pbin/pbin
 # updates: brew upgrade pbin
 ```
 
-(`<owner>/pbin` is the tap `<owner>/homebrew-pbin`; the third `pbin` is the
-formula. You can also `brew tap <owner>/pbin` then `brew install pbin`.)
+(`ahmetbedir/pbin` is the tap `ahmetbedir/homebrew-pbin`; the third `pbin` is the
+formula. You can also `brew tap ahmetbedir/pbin` then `brew install pbin`.)
 
 **Install script (macOS / Linux) — no Homebrew:**
 
 ```bash
-curl -fsSL https://github.com/<owner>/pbin/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/ahmetbedir/pbin/releases/latest/download/install.sh | sh
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-irm https://github.com/<owner>/pbin/releases/latest/download/install.ps1 | iex
+irm https://github.com/ahmetbedir/pbin/releases/latest/download/install.ps1 | iex
 ```
 
 Then configure the PrivateBin host once and create a bin:
