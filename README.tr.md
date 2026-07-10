@@ -39,7 +39,7 @@ binary olarak gelir (PHP gömülüdür) ve herhangi bir PrivateBin instance'ıyl
 **Homebrew (macOS / Linux):**
 
 ```bash
-brew install ahmetbedir/pbin/pbin
+brew install ahmetbedir/tap/pbin
 ```
 
 **Kurulum scripti (macOS / Linux):**

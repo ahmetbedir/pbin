@@ -3,7 +3,7 @@
 # Maintainer release script. Builds the PHAR, cross-compiles standalone
 # binaries for every platform with phpacker, signs the macOS ones, and
 # publishes them as a GitHub release on this repo (public repo = public,
-# no-auth downloads for the team).
+# no-auth downloads for everyone).
 #
 #   ./release.sh v1.0.0
 #
@@ -52,10 +52,10 @@ gh release create "$VERSION" \
     --latest
 
 # --- Homebrew tap ------------------------------------------------------------
-# Update the formula in the tap repo (<owner>/homebrew-pbin) so `brew upgrade`
+# Update the formula in the tap repo (<owner>/homebrew-tap) so `brew upgrade`
 # picks up the new version. Skipped (non-fatal) if the tap repo doesn't exist.
 OWNER="${REPO%/*}"
-TAP_REPO="${PBIN_TAP_REPO:-$OWNER/homebrew-pbin}"
+TAP_REPO="${PBIN_TAP_REPO:-$OWNER/homebrew-tap}"
 ver_no_v="${VERSION#v}"
 
 if gh repo view "$TAP_REPO" >/dev/null 2>&1; then
@@ -104,15 +104,15 @@ end
 EOF
     git -C "$tapdir" add Formula/pbin.rb
     git -C "$tapdir" commit -q -m "pbin $VERSION"
-    git -C "$tapdir" push -q
+    git -C "$tapdir" push -q -u origin HEAD
     rm -rf "$tapdir"
 else
     echo "==> Skipping Homebrew tap ($TAP_REPO not found)."
-    echo "    Create it once (public repo named 'homebrew-pbin') to enable brew installs."
+    echo "    Create it once (public repo named 'homebrew-tap') to enable brew installs."
 fi
 
 echo ""
-echo "==> Done. Team installs with:"
-echo "    Homebrew:     brew install $OWNER/pbin/pbin"
+echo "==> Done. Install with:"
+echo "    Homebrew:     brew install $OWNER/tap/pbin"
 echo "    macOS/Linux:  curl -fsSL https://github.com/$REPO/releases/latest/download/install.sh | sh"
 echo "    Windows:      irm https://github.com/$REPO/releases/latest/download/install.ps1 | iex"

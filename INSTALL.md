@@ -11,17 +11,18 @@ the repository can safely be public.
 
 ---
 
-## For team members (install & use)
+## Install & use
 
 **Homebrew (macOS / Linux) — recommended:**
 
 ```bash
-brew install ahmetbedir/pbin/pbin
+brew install ahmetbedir/tap/pbin
 # updates: brew upgrade pbin
 ```
 
-(`ahmetbedir/pbin` is the tap `ahmetbedir/homebrew-pbin`; the third `pbin` is the
-formula. You can also `brew tap ahmetbedir/pbin` then `brew install pbin`.)
+(`ahmetbedir/tap` resolves to the tap repo `ahmetbedir/homebrew-tap`; the third
+`pbin` is the formula. You can also `brew tap ahmetbedir/tap` then
+`brew install pbin`.)
 
 **Install script (macOS / Linux) — no Homebrew:**
 
@@ -54,7 +55,7 @@ Requirements: `php`, deps installed (`composer install`), `gh` authenticated
 (`gh auth login`), and the repo's GitHub remote configured.
 
 **One-time (for Homebrew):** create a second public repo named
-`homebrew-pbin` under your account. `release.sh` writes `Formula/pbin.rb`
+`homebrew-tap` under your account. `release.sh` writes `Formula/pbin.rb`
 into it on every release. If it doesn't exist, the release still succeeds and
 the Homebrew step is skipped. Override the tap repo with `PBIN_TAP_REPO=...`.
 
@@ -72,8 +73,8 @@ the Homebrew step is skipped. Override the tap repo with `PBIN_TAP_REPO=...`.
 4. bakes the repo slug into `install.sh` / `install.ps1`,
 5. publishes a GitHub release (`gh release create`) with every asset attached,
 6. regenerates `Formula/pbin.rb` (with fresh sha256 sums) and pushes it to the
-   `homebrew-pbin` tap repo.
+   `homebrew-tap` tap repo.
 
 Cut a new version by passing a new tag (`v1.0.1`, …); the `latest/download/…`
-URLs always resolve to the newest release, so the team's install command never
+URLs always resolve to the newest release, so the install command never
 changes.

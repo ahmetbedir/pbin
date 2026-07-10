@@ -10,7 +10,6 @@ use LaravelZero\Framework\Commands\Command;
 
 use function Laravel\Prompts\callout;
 use function Laravel\Prompts\clear;
-use function Laravel\Prompts\note;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
@@ -114,25 +113,12 @@ class CreateBin extends Command
         }
 
         $copied = $this->copyToClipboard($result['view_url']);
-        $footer = $copied ? 'View URL copied' : '';
 
         callout('PrivateBin Created', [
             'Your bin has been successfully created.',
             'You can view it using the link provided below.',
             Element::link($result['view_url']),
-        ], info: $footer ?: '');
-
-        // callout(label: 'PrivateBin Created', content: [
-        //     'Your bin has been successfully created. You can view it using the link provided below.',
-        //     Element::heading('View URL:'),
-        //     $result['view_url'],
-        //     Element::heading('Delete URL:'),
-        //     $result['delete_url'],
-        //     // Element::link($result['view_url'], 'View Bin'),
-        //     // Element::link($result['delete_url'], 'Delete Bin'),
-        // ], info: $footer ?: '', type: 'success');
-
-        // note("Bin created.\n\nView:   {$result['view_url']}\nDelete: {$result['delete_url']}{$footer}", 'success');
+        ], info: $copied ? 'View URL copied' : '');
 
         return self::SUCCESS;
     }

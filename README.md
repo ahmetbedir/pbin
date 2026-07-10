@@ -38,7 +38,7 @@ binary (PHP is embedded) and works with any PrivateBin instance.
 **Homebrew (macOS / Linux):**
 
 ```bash
-brew install ahmetbedir/pbin/pbin
+brew install ahmetbedir/tap/pbin
 ```
 
 **Install script (macOS / Linux):**
