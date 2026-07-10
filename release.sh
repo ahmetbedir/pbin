@@ -113,6 +113,6 @@ fi
 
 echo ""
 echo "==> Done. Install with:"
-echo "    Homebrew:     brew install $OWNER/tap/pbin"
+echo "    Homebrew:     brew tap $OWNER/tap && brew trust $OWNER/tap && brew install pbin"
 echo "    macOS/Linux:  curl -fsSL https://github.com/$REPO/releases/latest/download/install.sh | sh"
 echo "    Windows:      irm https://github.com/$REPO/releases/latest/download/install.ps1 | iex"

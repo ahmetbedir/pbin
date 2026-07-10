@@ -16,13 +16,15 @@ the repository can safely be public.
 **Homebrew (macOS / Linux) — recommended:**
 
 ```bash
-brew install ahmetbedir/tap/pbin
+brew tap ahmetbedir/tap
+brew trust ahmetbedir/tap
+brew install pbin
 # updates: brew upgrade pbin
 ```
 
-(`ahmetbedir/tap` resolves to the tap repo `ahmetbedir/homebrew-tap`; the third
-`pbin` is the formula. You can also `brew tap ahmetbedir/tap` then
-`brew install pbin`.)
+(`ahmetbedir/tap` resolves to the tap repo `ahmetbedir/homebrew-tap`. The
+`brew trust` step is only needed when `HOMEBREW_REQUIRE_TAP_TRUST` is set;
+otherwise it is a harmless no-op.)
 
 **Install script (macOS / Linux) — no Homebrew:**
 

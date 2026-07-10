@@ -39,7 +39,10 @@ binary olarak gelir (PHP gömülüdür) ve herhangi bir PrivateBin instance'ıyl
 **Homebrew (macOS / Linux):**
 
 ```bash
-brew install ahmetbedir/tap/pbin
+brew tap ahmetbedir/tap
+brew trust ahmetbedir/tap
+brew install pbin
+# güncelleme: brew upgrade pbin
 ```
 
 **Kurulum scripti (macOS / Linux):**
