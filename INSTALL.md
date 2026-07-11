@@ -19,7 +19,7 @@ the repository can safely be public.
 brew tap ahmetbedir/tap
 brew trust ahmetbedir/tap
 brew install pbin
-# updates: brew upgrade pbin
+# updates: brew update && brew upgrade pbin
 ```
 
 (`ahmetbedir/tap` resolves to the tap repo `ahmetbedir/homebrew-tap`. The

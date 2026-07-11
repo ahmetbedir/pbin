@@ -41,7 +41,7 @@ binary (PHP is embedded) and works with any PrivateBin instance.
 brew tap ahmetbedir/tap
 brew trust ahmetbedir/tap
 brew install pbin
-# updates: brew upgrade pbin
+# updates: brew update && brew upgrade pbin
 ```
 
 **Install script (macOS / Linux):**
