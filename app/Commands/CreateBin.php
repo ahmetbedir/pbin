@@ -82,7 +82,7 @@ class CreateBin extends Command
         $type = select(
             label: 'Type',
             options: [
-                'burn' => 'Delete after reading?',
+                'burn' => 'Delete after reading',
                 'discussion' => 'Open discussion (comments)',
                 'none' => 'None',
             ],
