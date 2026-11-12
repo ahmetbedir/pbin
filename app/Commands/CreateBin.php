@@ -35,7 +35,8 @@ class CreateBin extends Command
      */
     public function handle()
     {
-        $host = (new UserConfig)->get('privatebin_host') ?: config('privatebin.url');
+        // PRIVATEBIN_URL overrides the saved host, as documented (CI/testing).
+        $host = config('privatebin.url') ?: (new UserConfig)->get('privatebin_host');
         if (! $host) {
             $this->error('PrivateBin host is not configured. Run `pbin init` first.');
 
@@ -62,16 +63,19 @@ class CreateBin extends Command
             default: 'plaintext',
         );
 
+        $expiryOptions = [
+            '5min' => '5 minutes',
+            '1hour' => '1 hour',
+            '1day' => '1 day',
+            '1week' => '1 week',
+            'never' => 'Never',
+        ];
+        $defaultExpiry = config('privatebin.default_expiry');
+
         $expiry = select(
             label: 'Expiry',
-            options: [
-                '5min' => '5 minutes',
-                '1hour' => '1 hour',
-                '1day' => '1 day',
-                '1week' => '1 week',
-                'never' => 'Never',
-            ],
-            default: '1day',
+            options: $expiryOptions,
+            default: isset($expiryOptions[$defaultExpiry]) ? $defaultExpiry : '1day',
         );
 
         $password = password(
