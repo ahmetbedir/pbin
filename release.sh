@@ -27,7 +27,9 @@ cp -f builds/pbin builds/pbin.phar   # phpacker.json src points here
 composer install --no-interaction --quiet   # restore dev deps (phpacker is one)
 
 echo "==> Cross-building all platforms with phpacker"
-./vendor/bin/phpacker build all --no-interaction
+# Authenticated GitHub API calls avoid the 60/hour anonymous rate limit;
+# phpacker reads the token from $_ENV, hence variables_order.
+GITHUB_TOKEN="$(gh auth token)" php -d variables_order=EGPCS ./vendor/bin/phpacker build all --no-interaction
 
 echo "==> Packaging release assets"
 dist="builds/dist"
