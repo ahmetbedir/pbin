@@ -70,10 +70,13 @@ the Homebrew step is skipped. Override the tap repo with `PBIN_TAP_REPO=...`.
 1. builds the PHAR (`app:build`),
 2. cross-compiles binaries for **macOS arm64/x86_64, Linux x86_64/arm64,
    Windows x64** with [phpacker](https://github.com/phpacker/phpacker),
-3. ad-hoc signs the macOS binaries (required to run on Apple Silicon — this is
-   why we build on a Mac, not in Linux CI),
+3. ad-hoc signs the macOS binaries (required to run on Apple Silicon - this is
+   why we build on a Mac, not in Linux CI) and compresses each binary
+   (`.tar.gz`, `.zip` on Windows; ~15 MB instead of ~35 MB),
 4. bakes the repo slug into `install.sh` / `install.ps1`,
-5. publishes a GitHub release (`gh release create`) with every asset attached,
+5. creates a draft GitHub release, uploads the assets in parallel and publishes
+   it once all are there; the notes come from `notes/<version>.md` if present,
+   otherwise from the commit log since the previous tag,
 6. regenerates `Formula/pbin.rb` (with fresh sha256 sums) and pushes it to the
    `homebrew-tap` tap repo.
 

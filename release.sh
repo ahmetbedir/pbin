@@ -7,6 +7,10 @@
 #
 #   ./release.sh v1.0.0
 #
+# Release notes come from notes/<version>.md when it exists; otherwise they
+# are generated from the commit subjects since the previous tag, grouped by
+# Conventional Commit type.
+#
 # Requires: php, ./vendor/bin/phpacker, gh (authenticated: `gh auth login`),
 # run inside the repo with its GitHub remote configured.
 
@@ -32,28 +36,91 @@ echo "==> Cross-building all platforms with phpacker"
 GITHUB_TOKEN="$(gh auth token)" php -d variables_order=EGPCS ./vendor/bin/phpacker build all --no-interaction
 
 echo "==> Packaging release assets"
+# Each binary ships compressed (~35 MB -> ~15 MB), holding a single "pbin" (or
+# "pbin.exe"): half the upload and half of every user's download. Homebrew
+# unpacks archives itself; install.sh/install.ps1 unpack them too.
 dist="builds/dist"
 rm -rf "$dist"; mkdir -p "$dist"
-cp builds/build/mac/mac-arm             "$dist/pbin-macos-arm64"
-cp builds/build/mac/mac-x64             "$dist/pbin-macos-x86_64"
-cp builds/build/linux/linux-x64         "$dist/pbin-linux-x86_64"
-cp builds/build/linux/linux-arm         "$dist/pbin-linux-arm64"
-cp builds/build/windows/windows-x64.exe "$dist/pbin-windows-x86_64.exe"
 
-# Ad-hoc sign the macOS binaries (required to run on Apple Silicon).
-codesign --force --sign - "$dist/pbin-macos-arm64"  2>/dev/null || true
-codesign --force --sign - "$dist/pbin-macos-x86_64" 2>/dev/null || true
+pack() { # pack <phpacker output> <asset name>
+    stage="$(mktemp -d)"
+    case "$2" in
+        *windows*)
+            cp "$1" "$stage/pbin.exe"
+            (cd "$stage" && zip -q -9 "pbin.zip" pbin.exe)
+            mv "$stage/pbin.zip" "$dist/$2.zip" ;;
+        *)
+            cp "$1" "$stage/pbin"
+            chmod +x "$stage/pbin"
+            # Ad-hoc sign macOS binaries (required to run on Apple Silicon).
+            case "$2" in *macos*) codesign --force --sign - "$stage/pbin" 2>/dev/null || true ;; esac
+            tar -C "$stage" -czf "$dist/$2.tar.gz" pbin ;;
+    esac
+    rm -rf "$stage"
+}
+
+pack builds/build/mac/mac-arm             pbin-macos-arm64
+pack builds/build/mac/mac-x64             pbin-macos-x86_64
+pack builds/build/linux/linux-arm         pbin-linux-arm64
+pack builds/build/linux/linux-x64         pbin-linux-x86_64
+pack builds/build/windows/windows-x64.exe pbin-windows-x86_64
 
 # Bake the real repo slug into the installers so a plain curl of them works.
 sed "s|@@REPO@@|$REPO|g" install.sh  > "$dist/install.sh"
 sed "s|@@REPO@@|$REPO|g" install.ps1 > "$dist/install.ps1"
 
+echo "==> Preparing release notes"
+notes="$dist/notes.md"
+if [ -f "notes/$VERSION.md" ]; then
+    cp "notes/$VERSION.md" "$notes"
+    echo "    using notes/$VERSION.md"
+else
+    prev="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+    range="${prev:+$prev..}HEAD"
+    subjects="$(git log --no-merges --format='%s (%h)' "$range")"
+
+    section() { # section <title> <regex on the commit type>
+        lines="$(printf '%s\n' "$subjects" | grep -E "$2" | sed 's/^/- /' || true)"
+        [ -n "$lines" ] && printf '## %s\n\n%s\n\n' "$1" "$lines"
+        return 0
+    }
+
+    {
+        [ -z "$subjects" ] && printf 'Maintenance release.\n\n'
+        section "Features" '^feat(\(|!|:)'
+        section "Fixes" '^fix(\(|!|:)'
+        section "Other changes" '^(build|chore|ci|docs|perf|refactor|revert|style|test)(\(|!|:)'
+        printf '%s\n' "$subjects" | grep -qE '^[a-z]+(\([^)]*\))?!:' \
+            && printf '## ⚠️ Breaking changes\n\nSee the entries marked with "!" above.\n\n'
+        [ -n "$prev" ] && printf '**Full changelog:** https://github.com/%s/compare/%s...%s\n' "$REPO" "$prev" "$VERSION"
+        true
+    } > "$notes"
+    echo "    generated from ${range} (add notes/$VERSION.md to write them by hand)"
+fi
+
 echo "==> Publishing GitHub release"
-gh release create "$VERSION" \
-    "$dist"/pbin-* "$dist/install.sh" "$dist/install.ps1" \
-    --title "$VERSION" \
-    --notes "pbin $VERSION" \
-    --latest
+# As a draft first, so nobody sees a "latest" release with missing assets
+# while they upload; then upload in parallel (one connection doesn't fill the
+# uplink) and publish once all are there.
+gh release create "$VERSION" --draft --title "$VERSION" --notes-file "$notes"
+
+pids=""
+for asset in "$dist"/pbin-* "$dist/install.sh" "$dist/install.ps1"; do
+    gh release upload "$VERSION" "$asset" --clobber &
+    pids="$pids $!"
+done
+
+failed=0
+for pid in $pids; do
+    wait "$pid" || failed=1
+done
+
+if [ "$failed" -ne 0 ]; then
+    echo "!! Upload failed; release $VERSION left as a draft. Fix and re-run the upload, or delete it with: gh release delete $VERSION" >&2
+    exit 1
+fi
+
+gh release edit "$VERSION" --draft=false --latest
 
 # --- Homebrew tap ------------------------------------------------------------
 # Update the formula in the tap repo (<owner>/homebrew-tap) so `brew upgrade`
@@ -77,28 +144,28 @@ class Pbin < Formula
 
   on_macos do
     on_arm do
-      url "$base/pbin-macos-arm64"
-      sha256 "$(sha "$dist/pbin-macos-arm64")"
+      url "$base/pbin-macos-arm64.tar.gz"
+      sha256 "$(sha "$dist/pbin-macos-arm64.tar.gz")"
     end
     on_intel do
-      url "$base/pbin-macos-x86_64"
-      sha256 "$(sha "$dist/pbin-macos-x86_64")"
+      url "$base/pbin-macos-x86_64.tar.gz"
+      sha256 "$(sha "$dist/pbin-macos-x86_64.tar.gz")"
     end
   end
 
   on_linux do
     on_arm do
-      url "$base/pbin-linux-arm64"
-      sha256 "$(sha "$dist/pbin-linux-arm64")"
+      url "$base/pbin-linux-arm64.tar.gz"
+      sha256 "$(sha "$dist/pbin-linux-arm64.tar.gz")"
     end
     on_intel do
-      url "$base/pbin-linux-x86_64"
-      sha256 "$(sha "$dist/pbin-linux-x86_64")"
+      url "$base/pbin-linux-x86_64.tar.gz"
+      sha256 "$(sha "$dist/pbin-linux-x86_64.tar.gz")"
     end
   end
 
   def install
-    bin.install Dir["pbin-*"].first => "pbin"
+    bin.install "pbin"
   end
 
   test do

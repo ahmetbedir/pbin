@@ -62,10 +62,21 @@ else
     url="https://github.com/$REPO/releases/download/$VERSION/$asset"
 fi
 
-say "Downloading $asset ($VERSION)..."
-tmp="$(mktemp)"
-curl -fSL --progress-bar "$url" -o "$tmp" || die "download failed: $url"
-mv "$tmp" "$dest"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+# Releases ship a .tar.gz holding a single "pbin"; older ones (still
+# reachable through PBIN_VERSION) published the bare binary.
+if curl -fsIL "$url.tar.gz" >/dev/null 2>&1; then
+    say "Downloading $asset.tar.gz ($VERSION)..."
+    curl -fSL --progress-bar "$url.tar.gz" -o "$tmp/pbin.tar.gz" || die "download failed: $url.tar.gz"
+    tar -xzf "$tmp/pbin.tar.gz" -C "$tmp" pbin || die "could not unpack $asset.tar.gz"
+else
+    say "Downloading $asset ($VERSION)..."
+    curl -fSL --progress-bar "$url" -o "$tmp/pbin" || die "download failed: $url"
+fi
+
+mv "$tmp/pbin" "$dest"
 chmod +x "$dest"
 # Defensive: strip any quarantine flag so macOS Gatekeeper never blocks it.
 [ "$os" = "Darwin" ] && { xattr -c "$dest" 2>/dev/null || true; }
