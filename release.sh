@@ -20,9 +20,11 @@ cd "$(dirname "$0")"
 REPO="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
 echo "==> Releasing $VERSION to $REPO"
 
-echo "==> Building PHAR"
+echo "==> Building PHAR (without dev dependencies)"
+composer install --no-dev --optimize-autoloader --no-interaction --quiet
 php pbin app:build pbin --build-version="$VERSION" --no-interaction
 cp -f builds/pbin builds/pbin.phar   # phpacker.json src points here
+composer install --no-interaction --quiet   # restore dev deps (phpacker is one)
 
 echo "==> Cross-building all platforms with phpacker"
 ./vendor/bin/phpacker build all --no-interaction

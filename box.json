@@ -3,8 +3,7 @@
     "directories": [
         "app",
         "bootstrap",
-        "config",
-        "vendor"
+        "config"
     ],
     "files": [
         "composer.json"
@@ -14,5 +13,13 @@
     "compactors": [
         "KevinGH\\Box\\Compactor\\Php",
         "KevinGH\\Box\\Compactor\\Json"
+    ],
+    "finder": [
+        {
+            "in": "vendor",
+            "exclude": [
+                "jolicode"
+            ]
+        }
     ]
 }
