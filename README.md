@@ -122,7 +122,7 @@ per-user, so the tool is safe to use with private, internal instances.
 
 ## Building from source
 
-Requires PHP 8.2+ and Composer.
+Requires PHP 8.3+ and Composer.
 
 ```bash
 composer install

@@ -123,7 +123,7 @@ böylece araç özel/iç instance'larla güvenle kullanılabilir.
 
 ## Kaynaktan derleme
 
-PHP 8.2+ ve Composer gerekir.
+PHP 8.3+ ve Composer gerekir.
 
 ```bash
 composer install
